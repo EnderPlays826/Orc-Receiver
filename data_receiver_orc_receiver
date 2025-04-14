@@ -1,0 +1,77 @@
+import socket
+
+def orc_receiver(host='0.0.0.0', port=8080):
+    """A simple Orc Receiver that listens for incoming messages."""
+    # Create a socket object
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    
+    # Bind the socket to the specified host and port
+    server_socket.bind((host, port))
+    print(f"Orc Receiver is listening on {host}:{port}")
+    
+    # Start listening for incoming connections
+    server_socket.listen(5)  # Allow up to 5 connections
+    while True:
+        # Accept a connection
+        client_socket, address = server_socket.accept()
+        print(f"Connection from {address}")
+        
+        # Receive data from the client
+        data = client_socket.recv(1024).decode('utf-8')
+        print(f"Received data: {data}")
+        
+        # Send a response back to the client
+        client_socket.send("Data received by Orc Receiver!".encode('utf-8'))
+        
+        # Close the client connection
+        client_socket.close()
+
+if __name__ == "__main__":
+    orc_receiver()
+class OrcReceiver:
+    def __init__(self):
+        self.commands = {
+            "PING": self.ping,
+            "ECHO": self.echo,
+            "EXIT": self.exit_receiver,
+        }
+        self.running = True
+
+    def ping(self, data):
+        """Respond to a PING command."""
+        print("PONG")
+
+    def echo(self, data):
+        """Echo back the received data."""
+        print(f"ECHO: {data}")
+
+    def exit_receiver(self, data):
+        """Stop the receiver."""
+        print("Exiting Orc Receiver.")
+        self.running = False
+
+    def handle_command(self, command_line):
+        """Parse and execute the received command."""
+        parts = command_line.strip().split(" ", 1)
+        command = parts[0].upper()
+        data = parts[1] if len(parts) > 1 else ""
+        if command in self.commands:
+            self.commands[command](data)
+        else:
+            print(f"Unknown command: {command}")
+
+    def start(self):
+        """Start the Orc Receiver."""
+        print("Orc Receiver is running. Type commands to interact.")
+        while self.running:
+            try:
+                command_line = input("> ")  # Simulates receiving data
+                self.handle_command(command_line)
+            except KeyboardInterrupt:
+                print("\nReceiver interrupted. Exiting.")
+                break
+
+
+if __name__ == "__main__":
+    receiver = OrcReceiver()
+    receiver.start()
